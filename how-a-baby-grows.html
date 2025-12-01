@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How a Baby Grows</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+        }
+
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            background-color: #faf8f5;
+            color: #3d3d3d;
+            line-height: 1.7;
+        }
+
+        .page {
+            height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .page-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 60px;
+            max-width: 1400px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .image-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            max-width: 50%;
+            height: 100%;
+        }
+
+        .image-section.single-image img {
+            max-height: 80vh;
+            max-width: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .image-section.multi-panel img {
+            max-height: calc((80vh - 30px) / 2);
+            max-width: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+        }
+
+        .image-section.three-panel img {
+            max-height: calc((80vh - 45px) / 3);
+            max-width: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+        }
+
+        .text-section {
+            flex: 1;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .page-number {
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            color: #b8a590;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-family: 'Arial', sans-serif;
+            font-size: 32px;
+            font-weight: 600;
+            color: #5a4a3a;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-family: 'Arial', sans-serif;
+            font-size: 18px;
+            color: #8a7a6a;
+            font-style: italic;
+            margin-bottom: 25px;
+        }
+
+        .text-section p {
+            margin-bottom: 18px;
+            font-size: 17px;
+        }
+
+        .text-section p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Cover page special styling */
+        .cover-page {
+            background: linear-gradient(135deg, #fdf6ee 0%, #f5ebe0 100%);
+            text-align: center;
+        }
+
+        .cover-page .page-content {
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .cover-page h1 {
+            font-size: 52px;
+            color: #5a4a3a;
+        }
+
+        .cover-page .subtitle {
+            font-size: 22px;
+            margin-bottom: 0;
+        }
+
+        .cover-page .intro-text {
+            max-width: 600px;
+            font-size: 18px;
+            color: #6a5a4a;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            color: #b8a590;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-hint svg {
+            width: 24px;
+            height: 24px;
+            stroke: #b8a590;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        /* Navigation dots */
+        .nav-dots {
+            position: fixed;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #d4c4b4;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .nav-dot:hover {
+            background-color: #a89080;
+            transform: scale(1.3);
+        }
+
+        .nav-dot.active {
+            background-color: #8a7a6a;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation dots -->
+    <nav class="nav-dots">
+        <div class="nav-dot active" data-page="0"></div>
+        <div class="nav-dot" data-page="1"></div>
+        <div class="nav-dot" data-page="2"></div>
+        <div class="nav-dot" data-page="3"></div>
+        <div class="nav-dot" data-page="4"></div>
+        <div class="nav-dot" data-page="5"></div>
+        <div class="nav-dot" data-page="6"></div>
+        <div class="nav-dot" data-page="7"></div>
+        <div class="nav-dot" data-page="8"></div>
+    </nav>
+
+    <!-- Cover Page -->
+    <section class="page cover-page" id="page-0">
+        <div class="page-content">
+            <h1>How a Baby Grows</h1>
+            <p class="subtitle">The journey from two tiny cells to a new person</p>
+            <p class="intro-text">
+                Every person who has ever lived started the same way. This is the story of how it happens - 
+                from the very first moment when two cells meet, through nine months of growing and changing, 
+                until a new human being is ready to take their first breath.
+            </p>
+        </div>
+        <div class="scroll-hint">
+            <span>Scroll to begin</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+        </div>
+    </section>
+
+    <!-- Page 1: The Beginning -->
+    <section class="page" id="page-1">
+        <div class="page-content">
+            <div class="image-section single-image">
+                <img src="page1_bb.png" alt="Sperm and egg cell joining together">
+            </div>
+            <div class="text-section">
+                <div class="page-number">Page 1</div>
+                <h1>The Beginning</h1>
+                <p class="subtitle">Two cells become one</p>
+                <p>Every person who has ever lived started the same way: as two tiny cells joining together.</p>
+                <p>One cell comes from the mother - this is called the egg. It's one of the largest cells in the human body, but still only about the width of a single hair. The egg contains half of the instructions needed to build a new person.</p>
+                <p>The other cell comes from the father - this is called the sperm. It's much smaller, with a long tail that helps it swim. The sperm carries the other half of the instructions.</p>
+                <p>When a sperm reaches an egg and they fuse together, something remarkable happens. The two half-sets of instructions combine into one complete set - a full blueprint for building a unique human being. This single combined cell is called a zygote.</p>
+                <p>This moment - two cells becoming one - is the very beginning of a new life.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Page 2: The Tiny Ball -->
+    <section class="page" id="page-2">
+        <div class="page-content">
+            <div class="image-section three-panel">
+                <img src="page2_panel_1_bb.png" alt="Day 1: Single cell">
+                <img src="page2_panel_2_bb.png" alt="Day 2: Four cells">
+                <img src="page2_panel_3_bb.png" alt="Day 5: Blastocyst">
+            </div>
+            <div class="text-section">
+                <div class="page-number">Page 2</div>
+                <h1>The Tiny Ball</h1>
+                <p class="subtitle">Dividing and multiplying</p>
+                <p>That single cell doesn't stay single for long. Within hours, it begins to divide.</p>
+                <p>One cell splits into two. Those two split into four. Four become eight. This keeps happening, over and over. Each new cell contains the same complete set of instructions - copies of the original blueprint.</p>
+                <p>After about five days, there are over a hundred cells, clustered together in a tiny ball called a blastocyst. This whole ball is still smaller than a grain of sand.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Page 3: Finding a Home -->
+    <section class="page" id="page-3">
+        <div class="page-content">
+            <div class="image-section multi-panel">
+                <img src="page3_panel_1_bb.png" alt="Female reproductive system showing path from ovary to uterus">
+                <img src="page3_panel_2_bb.png" alt="Blastocyst implanting in uterine lining">
+            </div>
+            <div class="text-section">
+                <div class="page-number">Page 3</div>
+                <h1>Finding a Home</h1>
+                <p>While all this dividing is happening, the tiny ball of cells is also traveling.</p>
+                <p>It starts in the ovary, where the egg was released. From there it moves through the fallopian tube - a narrow passage that leads to the uterus. The uterus is a pear-shaped organ, about the size of a fist, located low in the mother's belly.</p>
+                <p>Around day six or seven, the blastocyst reaches the uterus and does something critical: it attaches to the soft, blood-rich lining of the uterine wall. This is called implantation.</p>
+                <p>Once attached, the ball of cells can now receive nutrients and oxygen from the mother's body. It has found its home for the next nine months.</p>
+                <p>At this point, the entire thing is about the size of a poppy seed.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Page 4: Taking Shape -->
+    <section class="page" id="page-4">
+        <div class="page-content">
+            <div class="image-section three-panel">
+                <img src="page4_panel_1_bb.png" alt="Week 5 embryo with heart beginning">
+                <img src="page4_panel_2_bb.png" alt="Week 7 embryo with arm and leg buds">
+                <img src="page4_panel_3_bb.png" alt="Week 8 embryo with forming limbs">
+            </div>
+            <div class="text-section">
+                <div class="page-number">Page 4</div>
+                <h1>Taking Shape</h1>
+                <p>Over the next few weeks, the ball of cells transforms dramatically. Different cells start taking on different jobs - some will become the brain, some the heart, some the skin.</p>
+                <p>By week five, a tiny heart tube begins to beat. It's not much bigger than a poppy seed, but it's already pumping.</p>
+                <p>By week six and seven, small buds appear where arms and legs will grow. The beginnings of eyes start to form. A tail-like structure is visible - a temporary feature that will disappear.</p>
+                <p>By week eight, all the major organs have started developing. The embryo is now about the size of a raspberry. What started as a single cell now has the basic blueprint of a human body taking shape.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Page 5: Looking More Human -->
+    <section class="page" id="page-5">
+        <div class="page-content">
+            <div class="image-section multi-panel">
+                <img src="page5_panel_1_bb.png" alt="Week 9 fetus with webbed fingers">
+                <img src="page5_panel_2_bb.png" alt="Week 12 fetus with formed features">
+            </div>
+            <div class="text-section">
+                <div class="page-number">Page 5</div>
+                <h1>Looking More Human</h1>
+                <p>From week nine onward, the embryo is now called a fetus. It's starting to look less like a strange sea creature and more like a tiny human.</p>
+                <p>At week nine, the fingers and toes are still webbed together, like a duck's foot. The head is very large compared to the body - almost half the total size. This is because the brain is growing rapidly.</p>
+                <p>By week twelve, the webbing between fingers and toes has disappeared. The face has formed - eyes, nose, ears, and lips are all in place, though the eyelids are fused shut. The fetus can move and wiggle, though the mother can't feel it yet.</p>
+                <p>The fetus is now about the size of a lime.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Page 6: Growing Stronger -->
+    <section class="page" id="page-6">
+        <div class="page-content">
+            <div class="image-section single-image">
+                <img src="page6_bb.png" alt="Week 20 fetus that can hear">
+            </div>
+            <div class="text-section">
+                <div class="page-number">Page 6</div>
+                <h1>Growing Stronger</h1>
+                <p>The second trimester - weeks thirteen through twenty-four - is a time of rapid growth and development.</p>
+                <p>The fetus grows from the size of a lemon to the size of an ear of corn. Bones harden. Muscles develop. The fetus kicks, stretches, and even hiccups. Around week eighteen to twenty, most mothers begin to feel these movements for the first time.</p>
+                <p>The ears are now working. The fetus can hear the mother's heartbeat, her voice, and muffled sounds from the outside world. Some respond to loud noises by startling.</p>
+                <p>Fine hair called lanugo covers the skin. Eyebrows and eyelashes grow in. Fingerprints form - completely unique patterns that will stay for life.</p>
+                <p>By week twenty-four, the fetus has a chance of surviving outside the womb with intensive medical care, though the lungs are still immature.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Page 7: Getting Ready -->
+    <section class="page" id="page-7">
+        <div class="page-content">
+            <div class="image-section multi-panel">
+                <img src="page7_panel_1_bb.png" alt="Week 28 fetus sucking thumb">
+                <img src="page7_panel_2_bb.png" alt="Week 40 baby in head-down position">
+            </div>
+            <div class="text-section">
+                <div class="page-number">Page 7</div>
+                <h1>Getting Ready</h1>
+                <p>The third trimester - weeks twenty-five through forty - is all about final preparations.</p>
+                <p>The fetus gains weight rapidly, adding layers of fat that will help regulate body temperature after birth. The wrinkled skin fills out and becomes smoother. The lungs are maturing, practicing breathing movements by inhaling and exhaling amniotic fluid.</p>
+                <p>The brain is developing quickly, forming billions of connections. The fetus now has sleep and wake cycles. It can open its eyes, suck its thumb, and grip with its hands.</p>
+                <p>Around week thirty-six, most babies shift into a head-down position, preparing for the journey through the birth canal. Space is getting tight - the kicks and movements feel stronger because there's less room to move.</p>
+                <p>By week forty, the fetus is fully developed and ready to be born. What started as a single cell is now a complete human being, about the size of a small watermelon.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Page 8: Hello World -->
+    <section class="page" id="page-8">
+        <div class="page-content">
+            <div class="image-section single-image">
+                <img src="page8_bb.png" alt="Newborn baby taking first breath">
+            </div>
+            <div class="text-section">
+                <div class="page-number">Page 8</div>
+                <h1>Hello World</h1>
+                <p class="subtitle">From one cell to a new life</p>
+                <p>After approximately forty weeks of growing and developing, the baby is ready to be born.</p>
+                <p>Labor begins when the muscles of the uterus start contracting, slowly pushing the baby downward. The cervix - the opening at the bottom of the uterus - stretches open. This process can take many hours.</p>
+                <p>Eventually, the baby emerges into the world, usually head first. The umbilical cord, which has been the lifeline connecting the baby to the mother, is cut. The baby takes its first breath, filling its lungs with air for the first time.</p>
+                <p>In that moment, everything that began with two microscopic cells - the egg and the sperm - is now a complete, breathing, crying, living person.</p>
+                <p>From a single cell smaller than a grain of sand to a baby weighing around three kilograms. From a simple set of instructions to a brain with billions of neurons. From floating in warm fluid to breathing air and seeing light.</p>
+                <p>This is how every person begins.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Navigation dots functionality
+        const dots = document.querySelectorAll('.nav-dot');
+        const pages = document.querySelectorAll('.page');
+
+        // Click on dot to navigate
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const pageNum = dot.getAttribute('data-page');
+                document.getElementById(`page-${pageNum}`).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Update active dot on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const pageId = entry.target.id;
+                    const pageNum = pageId.split('-')[1];
+                    
+                    dots.forEach(dot => dot.classList.remove('active'));
+                    document.querySelector(`.nav-dot[data-page="${pageNum}"]`).classList.add('active');
+                }
+            });
+        }, { threshold: 0.5 });
+
+        pages.forEach(page => observer.observe(page));
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            const currentActive = document.querySelector('.nav-dot.active');
+            const currentPage = parseInt(currentActive.getAttribute('data-page'));
+            
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                if (currentPage < 8) {
+                    document.getElementById(`page-${currentPage + 1}`).scrollIntoView({ behavior: 'smooth' });
+                }
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                if (currentPage > 0) {
+                    document.getElementById(`page-${currentPage - 1}`).scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
